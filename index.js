@@ -21,7 +21,7 @@ function countdownTimer() {
   const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
   const countdownDiv = document.getElementById("countdown");
-  countdownDiv.innerHTML = days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+  countdownDiv.innerHTML = days + " days, " + hours + " hours, " + minutes + " minutes and " + seconds + " seconds";
 }
 
 // Call the countdownTimer() function every second using setInterval
