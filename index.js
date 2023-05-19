@@ -1,6 +1,5 @@
 const myDate = new Date('2009-01-01');
-document.
- calculateYearsSince(myDate);
+document.getElementById("age") = calculateYearsSince(myDate);
 
 function calculateYearsSince(date) {
     const diffInMs = Date.now() - date.getTime();
