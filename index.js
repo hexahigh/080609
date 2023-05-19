@@ -7,10 +7,12 @@ function calculateYearsSince(date) {
 const myDate = new Date('2009-08-06');
 document.getElementById("age").innerText = calculateYearsSince(myDate) + " Years old";
 
+const currentYear = new Date().getFullYear();
+const theDate = currentYear + "-06-08"
 
 function countdownTimer() {
   const now = new Date().getTime();
-  const nextYear = new Date("2023-06-08").getTime();
+  const nextYear = new Date(theDate).getTime();
   const timeRemaining = nextYear - now;
 
   const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
