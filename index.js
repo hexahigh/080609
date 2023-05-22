@@ -4,7 +4,7 @@ function calculateYearsSince(date) {
   return Math.floor(diffInYears);
 }
 
-const myDate = new Date('2009-08-06');
+const myDate = new Date('2009-06-08');
 document.getElementById("age").innerText = calculateYearsSince(myDate) + " Years old";
 
 const currentYear = new Date().getFullYear();
