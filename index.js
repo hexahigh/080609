@@ -7,7 +7,7 @@ function calculateYearsSince() {
   const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  document.getElementById("age").innerText = diffInYears + " years, " + days + " days, " + hours + " hours and " + minutes + " minutes"
+  document.getElementById("age").innerText = math.floor(diffInYears) + " years, " + days + " days, " + hours + " hours and " + minutes + " minutes"
 }
 
 var year = 2023
