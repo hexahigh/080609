@@ -1,6 +1,6 @@
-function calculateYearsSince(date) {
+function calculateYearsSince() {
   const now = new Date().getTime();
-  const diffInMs = Date.now() - date.getTime();
+  const diffInMs = now.now() - now.getTime();
   const diffInYears = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
   const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -43,4 +43,4 @@ function countdown() {
 
 // Call the countdownTimer() function every second using setInterval
 setInterval(countdown, 500);
-setInterval(document.getElementById("age").innerText = calculateYearsSince(myDate) + " Years old", 2000)
+setInterval(calculateYearsSince, 2000)
