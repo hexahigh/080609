@@ -1,6 +1,5 @@
 function calculateYearsSince() {
-  const now = new Date().getTime();
-  const diffInMs = now.now() - now.getTime();
+  const diffInMs = Date.now() - Date.getTime();
   const diffInYears = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
   const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
