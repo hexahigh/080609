@@ -9,9 +9,9 @@ function calculateYearsSince() {
   //const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   //const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  document.getElementById("ageYears").innerText = Math.floor(diffInYears) + " years,"
-  document.getElementById("ageDays").innerText = days + " days,"
-  document.getElementById("ageHours").innerText = hours + " hours and"
+  document.getElementById("ageYears").innerText = Math.floor(diffInYears) + " years"
+  document.getElementById("ageDays").innerText = days + " days"
+  document.getElementById("ageHours").innerText = hours + " hours"
   document.getElementById("ageMinutes").innerText = minutes + " minutes"
 }
 
