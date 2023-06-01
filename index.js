@@ -4,10 +4,23 @@ function calculateYearsSince() {
   const diffInMs = Date.now() - myDate.getTime();
   const diffInYears = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
   const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(hoursSince())
+  //const hours = Math.floor((diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  document.getElementById("age").innerText = Math.floor(diffInYears) + " years, " + days + " days, " + hours + " hours and " + minutes + " minutes"
+  document.getElementById("ageYears").innerText = Math.floor(diffInYears) + " years"
+  document.getElementById("ageDays").innerText = days + " days"
+  document.getElementById("ageHours").innerText = hours + " hours"
+  document.getElementById("ageMinutes").innerText = minutes + " minutes"
+}
+
+function hoursSince() {
+  const myDate = new Date('2009-06-08');
+
+  const now = new Date();
+  const diff = now - myDate;
+  const hours = Math.floor(diff / 3.6e6);
+  return hours;
 }
 
 var year = 2023
