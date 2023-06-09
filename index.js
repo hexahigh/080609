@@ -43,6 +43,7 @@ function countdownTimer() {
 }
 
 function countdown() {
+  const theDate = "2009-06-08"
   const now = new Date().getTime();
   const nextYear = new Date(theDate).getTime();
   const timeRemaining = nextYear - now;
