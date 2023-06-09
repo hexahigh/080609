@@ -7,4 +7,4 @@ function calculateYearsSince() {
     document.getElementById("number").innerText = diffInNs
 }
 
-setInterval(calculateYearsSince, 0.1)
+setInterval(calculateYearsSince, 0)
