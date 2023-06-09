@@ -34,7 +34,7 @@ function countdownTimer() {
   const now = new Date().getTime();
   const nextYear = new Date(theDate).getTime();
   const timeRemaining = nextYear - now;
-  if (nextYear < 0) {
+  if (timeRemaining < 0) {
     year = year + 1
     countdownTimer()
   } else {
