@@ -51,8 +51,6 @@ function countdown() {
   if (timeRemaining < 0) {
     year = year + 1
     countdown()
-  } else {
-    countdown()
   }
 
   const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
