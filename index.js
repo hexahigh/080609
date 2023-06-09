@@ -28,9 +28,9 @@ var year = 2023
 const myDate = new Date('2009-06-08');
 
 const currentYear = new Date().getFullYear();
-const theDate = year + "-06-08"
 
 function countdownTimer() {
+  const theDate = year + "-06-08"
   const now = new Date().getTime();
   const nextYear = new Date(theDate).getTime();
   const timeRemaining = nextYear - now;
