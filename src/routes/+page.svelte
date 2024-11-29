@@ -14,7 +14,7 @@
 		<ul>
             {#each hostlist as host}
                 <li class="self-center">
-                    <a href={host.url}>{host.name}</a>
+					<a href={host.url}>{host.name}</a>
                     <p>{host.description}</p>
                 </li>
             {/each}
