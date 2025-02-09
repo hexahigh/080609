@@ -54,6 +54,14 @@ export async function play(
     return;
   }
 
+  // Create pixel-to-char lookup table (LUT)
+  const chars = options.oneBit ? " #" : " .,-:;=+*#%$@";
+  const lut = new Array(256);
+  for (let i = 0; i < 256; i++) {
+    const index = Math.floor((i / 255) * (chars.length - 1));
+    lut[i] = chars[index];
+  }
+
   // Calculate the scale
   scaleFactor = 100 / video.video_info.width;
 
@@ -123,7 +131,7 @@ export async function play(
         }
         // Print the frame
         stdlib.setLineData([]);
-        stdlib.print(pixelsToChars(frameData, video.video_info.width, video.video_info.height, options.oneBit));
+        stdlib.print(pixelsToChars(frameData, video.video_info.width, video.video_info.height, lut));
         i++;
       } else {
         stdlib.showStuff;
@@ -156,23 +164,15 @@ function timeToFrame(fps: number, time: number): number {
   return (time / 1000) * fps;
 }
 
-function pixelToChar(pixel: number, oneBit?: boolean): string {
-  // Characters in increasing density
-  let chars = " .,-:;=+*#%$@";
-  if (oneBit) {
-    chars = " #";
-  }
-  return chars[Math.floor((pixel / 255) * chars.length)];
-}
-
-function pixelsToChars(pixels: Uint8Array, width: number, height: number, oneBit?: boolean): string {
-  let pixelsOut = ""
-
+// Optimized rendering function
+function pixelsToChars(pixels: Uint8Array, width: number, height: number, lut: string[]): string {
+  const lines: string[] = [];
   for (let y = 0; y < height; y++) {
+    const line = [];
     for (let x = 0; x < width; x++) {
-      pixelsOut += pixelToChar(pixels[y * width + x], oneBit)
+      line.push(lut[pixels[y * width + x]]);
     }
-    pixelsOut += "\n"
+    lines.push(line.join(''));
   }
-  return pixelsOut
+  return lines.join('\n');
 }
