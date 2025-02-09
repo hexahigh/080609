@@ -15,7 +15,7 @@ type PlayOptions = {
 const defaultOptions: PlayOptions = {
   speed: 1,
   delayToSkip: 100,
-  oneBit: true
+  oneBit: false
 }
 
 export async function play(
