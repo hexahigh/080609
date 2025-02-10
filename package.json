@@ -33,11 +33,20 @@
 		"@msgpack/msgpack": "^3.0.0",
 		"axios": "^1.7.9",
 		"dayjs": "^1.11.13",
+		"flowbite": "^3.1.2",
+		"flowbite-svelte": "^0.47.4",
 		"fuse.js": "^7.1.0",
 		"mode-watcher": "^0.5.0",
 		"msgpackr": "^1.11.2",
 		"pako": "^2.1.0",
+		"rehype-sanitize": "^6.0.0",
+		"rehype-stringify": "^10.0.1",
+		"remark-gfm": "^4.0.0",
+		"remark-lint": "^10.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.1.1",
 		"svelte-meta-tags": "^4.1.0",
-		"tone": "^15.0.4"
+		"tone": "^15.0.4",
+		"unified": "^11.0.5"
 	}
 }
