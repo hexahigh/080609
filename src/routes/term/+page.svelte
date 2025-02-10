@@ -103,9 +103,72 @@
 	}
 
 	const handle = (text) => {
-		const [command, ...args] = text.trim().split(' ');
+		// Helper function to parse arguments with spaces
+		const parseArgs = (text) => {
+			const args = [];
+			let currentArg = '';
+			let inString = false;
+			let stringType = null;
+
+			for (let i = 0; i < text.length; i++) {
+				const char = text[i];
+
+				// Handle escape characters
+				if (char === '\\' && !inString) {
+					const nextChar = text[++i];
+					switch (nextChar) {
+						case '"':
+						case "'":
+						case '\\':
+							currentArg += nextChar;
+							break;
+						default:
+							currentArg += '\\' + nextChar;
+					}
+					continue;
+				}
+
+				// Handle string quotes
+				if ((char === '"' || char === "'") && !inString) {
+					stringType = char;
+					inString = true;
+					continue;
+				}
+
+				if (char === stringType && inString) {
+					inString = false;
+					stringType = null;
+					continue;
+				}
+
+				// Handle spaces outside quotes
+				if (char === ' ' && !inString) {
+					if (currentArg.trim()) {
+						args.push(currentArg);
+						currentArg = '';
+					}
+					continue;
+				}
+
+				currentArg += char;
+			}
+
+			// Add the last argument if it exists
+			if (currentArg.trim()) {
+				args.push(currentArg);
+			}
+
+			return args;
+		};
+
+		// Parse the command line
+		const parts = parseArgs(text.trim());
+		const command = parts.shift();
+		const args = parts;
+
 		// Find the command in the commands array
 		const foundCommand = commands.find((cmd) => cmd.name === command);
+
 		if (foundCommand) {
 			// Execute the found command
 			return foundCommand.execute(args);
@@ -113,15 +176,11 @@
 			const options = { keys: ['name'] };
 			const fuse = new Fuse(commands, options);
 			const result = fuse.search(command);
-
 			let response = `Command '${command}' not found.`;
-
 			if (result.length > 0) {
 				response += ` Did you mean ${result[0].item.name}?`;
 			}
-
 			response += `\nType 'list' to see a list of available commands.`;
-			// Return a message indicating that the command was not found
 			return print(response);
 		}
 	};
