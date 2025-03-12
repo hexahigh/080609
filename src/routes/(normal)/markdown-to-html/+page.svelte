@@ -17,7 +17,21 @@
 	import remarkGfm from 'remark-gfm';
 	import { unified } from 'unified';
 
-	let alerts = [];
+	let alerts: {
+		text: string;
+		color:
+			| 'dark'
+			| 'red'
+			| 'yellow'
+			| 'green'
+			| 'indigo'
+			| 'purple'
+			| 'pink'
+			| 'blue'
+			| 'primary'
+			| 'none';
+		icon: string;
+	}[] = $state([]);
 
 	let conversionOptions = $state({
 		gfm: true,
@@ -39,14 +53,15 @@
 
 			outputValue = u.processSync(inputValue).toString();
 
+			alerts.push({ text: 'Conversion successful', color: 'green', icon: 'nrk:check' });
 		} catch (e) {
-			outputValue = e
-			alerts.push({ text: e, color: 'red' });
+			outputValue = e;
+			alerts.push({ text: e, color: 'red', icon: 'nrk:close' });
 		}
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-between gap-4 px-4">
+<div class="flex min-h-screen flex-col items-center justify-between gap-4 px-4 md:flex-row">
 	<!-- Left Section -->
 	<div class="flex flex-1 flex-col items-center justify-center space-y-2">
 		<Label for="markdown-input">Markdown</Label>
@@ -85,9 +100,21 @@
 			bind:value={outputValue}
 		/>
 	</div>
+</div>
+
+<div class="toast-container">
 	{#each alerts as alert}
 		<Toast transition={fly} params={{ x: 200 }} color={alert.color} class="mb-4">
+			<iconify-icon icon={alert.icon} slot="icon"></iconify-icon>
 			{alert.text}
 		</Toast>
 	{/each}
 </div>
+
+<style>
+	.toast-container {
+		position: fixed;
+		right: 1rem;
+		bottom: 1rem;
+	}
+</style>

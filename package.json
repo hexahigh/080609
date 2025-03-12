@@ -36,6 +36,7 @@
 		"flowbite": "^3.1.2",
 		"flowbite-svelte": "^0.47.4",
 		"fuse.js": "^7.1.0",
+		"iconify-icon": "^2.3.0",
 		"mode-watcher": "^0.5.0",
 		"msgpackr": "^1.11.2",
 		"pako": "^2.1.0",
