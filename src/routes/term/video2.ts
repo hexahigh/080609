@@ -1,8 +1,9 @@
-import type { StdlibType, TextVideo2 } from "./types";
+import type { StdlibType, TextVideo2, Video2WorkerResponse, Video2WorkerMessage } from "./types";
 import * as Tone from "tone";
 import axios, { type AxiosResponse } from "axios";
 import { unpack, pack } from 'msgpackr';
 import Pako from "pako";
+import video2Worker from "./video2.worker?worker";
 
 type PlayOptions = {
   speed?: number;
@@ -70,11 +71,36 @@ export async function play(
   stdlib.print("Width: " + video.video_info.width);
   stdlib.print("Height: " + video.video_info.height);
 
+  // Create the web worker (make sure the worker file is named "videoWorker.js")
+  const worker = new video2Worker();
+
+  // Receive messages from the worker.
+  worker.onmessage = (e) => {
+    const data = e.data as Video2WorkerResponse;
+
+    switch (data.type) {
+      case "frame":
+        const frame = data.text;
+        const lines = frame.split("\n");
+        stdlib.setLineData([]);
+        for (let i = 0; i < lines.length; i++) {
+          stdlib.print(lines[i]);
+        }
+        break;
+
+      case "stats":
+    }
+  };
+
+  // Send the video data and oneBit option to the worker for decoding.
+  worker.postMessage({  type: "init", video, oneBit: options.oneBit} as Video2WorkerMessage);
+
   stdlib.print(
     "Your video will start in 5 seconds, if the video looks weird then you might need to zoom out."
   );
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
+  // Start audio when Tone is loaded.
   Tone.loaded().then(() => {
     if (options.speed) {
       player.playbackRate = options.speed;
@@ -123,15 +149,8 @@ export async function play(
         } else {
           skippedInARow = 0
         }
-        let frameData: Uint8Array
-        if (video.video_info.compression === "gzip") {
-          frameData = Pako.inflate(video.frames[i].data)
-        } else {
-          frameData = video.frames[i].data
-        }
         // Print the frame
-        stdlib.setLineData([]);
-        stdlib.print(pixelsToChars(frameData, video.video_info.width, video.video_info.height, lut));
+        worker.postMessage({ type: "requestFrame", index: i } as Video2WorkerMessage);
         i++;
       } else {
         stdlib.showStuff;
@@ -142,7 +161,6 @@ export async function play(
     }, delay);
   });
 }
-
 function frameToTime(fps: number, frame: number) {
   let ms = (frame / fps) * 1000;
   let seconds = Math.floor(ms / 1000);

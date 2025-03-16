@@ -138,6 +138,8 @@ pre {
 .input {
   color: var(--color-input);
   font-family: var(--font-family);
+  background: transparent;
+  @apply p-0
 }
 
 .input:focus {
