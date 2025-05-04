@@ -48,7 +48,7 @@ export interface TextVideo2 {
     fps: number;
     width: number;
     height: number;
-    compression: "gzip" | "none" | "";
+    compression: "gzip" | "zstd" | "none" | "";
   }
   frames: {
     data: Uint8Array;

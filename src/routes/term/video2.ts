@@ -1,8 +1,6 @@
 import type { StdlibType, TextVideo2, Video2WorkerResponse, Video2WorkerMessage } from "./types";
 import * as Tone from "tone";
-import axios, { type AxiosResponse } from "axios";
 import { unpack, pack } from 'msgpackr';
-import Pako from "pako";
 import video2Worker from "./video2.worker?worker";
 
 type PlayOptions = {
@@ -48,9 +46,9 @@ export async function play(
   
   video = unpack(uint8Array)
 
-  if (video.format_version !== 1) {
+  if (video.format_version !== 1 && video.format_version !== 2) {
     stdlib.print(
-      "Unsupported format version, expected 1, got " + video.format_version
+      "Unsupported format version, expected 1 or 2, got " + video.format_version
     );
     return;
   }
@@ -89,11 +87,13 @@ export async function play(
         break;
 
       case "stats":
+        console.log(`Received stats from worker: ${data.stats}`);
+        break;
     }
   };
 
   // Send the video data and oneBit option to the worker for decoding.
-  worker.postMessage({  type: "init", video, oneBit: options.oneBit} as Video2WorkerMessage);
+  worker.postMessage({ type: "init", video, oneBit: options.oneBit} as Video2WorkerMessage);
 
   stdlib.print(
     "Your video will start in 5 seconds, if the video looks weird then you might need to zoom out."
