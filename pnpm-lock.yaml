@@ -65,6 +65,9 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+      zstddec:
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.3.1
@@ -1756,6 +1759,9 @@ packages:
 
   zimmerframe@1.1.2:
     resolution: {integrity: sha512-rAbqEGa8ovJy4pyBxZM70hg4pE6gDgaQ0Sl9M3enG3I0d6H4XSAM3GeNGLKnsBpuijUow064sf7ww1nutC5/3w==}
+
+  zstddec@0.1.0:
+    resolution: {integrity: sha512-w2NTI8+3l3eeltKAdK8QpiLo/flRAr2p8AGeakfMZOXBxOg9HIu4LVDxBi81sYgVhFhdJjv1OrB5ssI8uFPoLg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -3532,5 +3538,7 @@ snapshots:
   yaml@2.6.1: {}
 
   zimmerframe@1.1.2: {}
+
+  zstddec@0.1.0: {}
 
   zwitch@2.0.4: {}

@@ -611,7 +611,7 @@
 	{#each lineData as line, i (i)}
 		<span>
 			{#if line.type === 'input'}
-				<p class="prompt">{user}@{machine}:$&nbsp;</p>
+				<p class="prompt">{user}@{machine}:$</p>
 				<pre class="input-old">{line.command}</pre>
 				<br />
 			{:else if line.type === 'output'}

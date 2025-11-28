@@ -48,7 +48,7 @@ export interface TextVideo2 {
     fps: number;
     width: number;
     height: number;
-    compression: "gzip" | "none" | "";
+    compression: "gzip" | "zstd" | "none" | "";
   }
   frames: {
     data: Uint8Array;
@@ -63,4 +63,31 @@ export type LineDataEntry =
 | {
     output: string;
     type: 'output' | 'outputHtml';
+};
+
+export type Video2WorkerMessage = {
+  type: 'init';
+  video: TextVideo2;
+  oneBit?: boolean;
+} | {
+  type: 'requestFrame';
+  index: number;
+} | {
+  type: 'stats';
+}
+
+export type Video2WorkerResponse = {
+  type: 'frame';
+  index: number;
+  text: string;
+} | {
+  type: 'end';
+} | {
+  type: 'stats';
+  stats: {
+    buffer: {
+      size: number;
+      max: number;
+    }
   };
+}

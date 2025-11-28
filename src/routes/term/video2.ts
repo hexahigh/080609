@@ -1,22 +1,21 @@
-import type { StdlibType, TextVideo2 } from "./types";
-import * as Tone from "tone";
-import axios, { type AxiosResponse } from "axios";
+import type { StdlibType, TextVideo2, Video2WorkerResponse, Video2WorkerMessage } from './types';
+import * as Tone from 'tone';
 import { unpack, pack } from 'msgpackr';
-import Pako from "pako";
+import video2Worker from './video2.worker?worker';
 
 type PlayOptions = {
   speed?: number;
   // Maximum delay between audio and video before skipping
   delayToSkip?: number;
   // Fully monochrome
-  oneBit?: boolean
+  oneBit?: boolean;
 };
 
 const defaultOptions: PlayOptions = {
   speed: 1,
   delayToSkip: 100,
   oneBit: false
-}
+};
 
 export async function play(
   stdlib: StdlibType,
@@ -24,14 +23,13 @@ export async function play(
   audioUrl: string,
   options: PlayOptions
 ) {
-
   options = { ...defaultOptions, ...options };
 
-  stdlib.print("Loading, please wait...");
+  stdlib.print('Loading, please wait...');
 
   let player = new Tone.Player();
 
-  if (audioUrl !== "") {
+  if (audioUrl !== '') {
     // Load audio
     player = new Tone.Player(audioUrl).toDestination();
   }
@@ -41,21 +39,19 @@ export async function play(
   let video: TextVideo2;
 
   // Download video
-  const response = await fetch(videoUrl)
+  const response = await fetch(videoUrl);
   const arrayBuffer = await response.arrayBuffer();
   const uint8Array = new Uint8Array(arrayBuffer);
-  
-  video = unpack(uint8Array)
 
-  if (video.format_version !== 1) {
-    stdlib.print(
-      "Unsupported format version, expected 1, got " + video.format_version
-    );
+  video = unpack(uint8Array);
+
+  if (video.format_version !== 1 && video.format_version !== 2) {
+    stdlib.print('Unsupported format version, expected 1 or 2, got ' + video.format_version);
     return;
   }
 
   // Create pixel-to-char lookup table (LUT)
-  const chars = options.oneBit ? " #" : " .,-:;=+*#%$@";
+  const chars = options.oneBit ? ' #' : ' .,-:;=+*#%$@';
   const lut = new Array(256);
   for (let i = 0; i < 256; i++) {
     const index = Math.floor((i / 255) * (chars.length - 1));
@@ -65,16 +61,43 @@ export async function play(
   // Calculate the scale
   scaleFactor = 100 / video.video_info.width;
 
-  stdlib.print("Scale Factor: " + scaleFactor);
-  stdlib.print("Fps: " + video.video_info.fps);
-  stdlib.print("Width: " + video.video_info.width);
-  stdlib.print("Height: " + video.video_info.height);
+  stdlib.print('Scale Factor: ' + scaleFactor);
+  stdlib.print('Fps: ' + video.video_info.fps);
+  stdlib.print('Width: ' + video.video_info.width);
+  stdlib.print('Height: ' + video.video_info.height);
+
+  // Create the web worker (make sure the worker file is named "videoWorker.js")
+  const worker = new video2Worker();
+
+  // Receive messages from the worker.
+  worker.onmessage = (e) => {
+    const data = e.data as Video2WorkerResponse;
+
+    switch (data.type) {
+      case 'frame':
+        const frame = data.text;
+        const lines = frame.split('\n');
+        stdlib.setLineData([]);
+        for (let i = 0; i < lines.length; i++) {
+          stdlib.print(lines[i]);
+        }
+        break;
+
+      case 'stats':
+        console.log(`Received stats from worker: ${data.stats}`);
+        break;
+    }
+  };
+
+  // Send the video data and oneBit option to the worker for decoding.
+  worker.postMessage({ type: 'init', video, oneBit: options.oneBit } as Video2WorkerMessage);
 
   stdlib.print(
-    "Your video will start in 5 seconds, if the video looks weird then you might need to zoom out."
+    'Your video will start in 5 seconds, if the video looks weird then you might need to zoom out.'
   );
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
+  // Start audio when Tone is loaded.
   Tone.loaded().then(() => {
     if (options.speed) {
       player.playbackRate = options.speed;
@@ -100,38 +123,36 @@ export async function play(
     // Print one frame every options.speed milliseconds
     let i = 0;
     const framesLength = video.frames.length; // Store the length of the frames array
-    let startTime = Date.now()
-    let skippedInARow: number = 0
+    let startTime = Date.now();
+    let skippedInARow: number = 0;
     setInterval(() => {
       // Check if i is within the bounds of the frames array
       if (i < framesLength) {
-        let sinceStart = Date.now() - startTime
+        let sinceStart = Date.now() - startTime;
         let frame = timeToFrame(video.video_info.fps, sinceStart);
-        let delayMs = Math.abs(frameToTime(video.video_info.fps, i).ms - frameToTime(video.video_info.fps, frame).ms);
+        let delayMs = Math.abs(
+          frameToTime(video.video_info.fps, i).ms - frameToTime(video.video_info.fps, frame).ms
+        );
         if (delayMs > options.delayToSkip) {
-          console.log(delayMs, "out of sync. Skipping to", frame)
+          console.log(delayMs, 'out of sync. Skipping to', frame);
           // Skip to the correct frame
-          i = Math.round(frame)
+          i = Math.round(frame);
           if (skippedInARow >= 5) {
-            console.log("We seem to be stuck in a loop, setting max delay to:", options.delayToSkip + 10)
-            options.delayToSkip = options.delayToSkip + 10
-            skippedInARow = 0
+            console.log(
+              'We seem to be stuck in a loop, setting max delay to:',
+              options.delayToSkip + 10
+            );
+            options.delayToSkip = options.delayToSkip + 10;
+            skippedInARow = 0;
           } else {
-            skippedInARow++
+            skippedInARow++;
           }
           return;
         } else {
-          skippedInARow = 0
-        }
-        let frameData: Uint8Array
-        if (video.video_info.compression === "gzip") {
-          frameData = Pako.inflate(video.frames[i].data)
-        } else {
-          frameData = video.frames[i].data
+          skippedInARow = 0;
         }
         // Print the frame
-        stdlib.setLineData([]);
-        stdlib.print(pixelsToChars(frameData, video.video_info.width, video.video_info.height, lut));
+        worker.postMessage({ type: 'requestFrame', index: i } as Video2WorkerMessage);
         i++;
       } else {
         stdlib.showStuff;
@@ -142,14 +163,13 @@ export async function play(
     }, delay);
   });
 }
-
 function frameToTime(fps: number, frame: number) {
   let ms = (frame / fps) * 1000;
   let seconds = Math.floor(ms / 1000);
 
   return {
     ms: ms,
-    sec: seconds,
+    sec: seconds
   };
 }
 

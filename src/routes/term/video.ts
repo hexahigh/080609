@@ -1,7 +1,7 @@
-import type { StdlibType, TextVideo } from "./types";
-import * as Tone from "tone";
-import axios, { type AxiosResponse } from "axios";
-import Pako from "pako";
+import type { StdlibType, TextVideo } from './types';
+import * as Tone from 'tone';
+import axios, { type AxiosResponse } from 'axios';
+import Pako from 'pako';
 
 type PlayOptions = {
   speed?: number;
@@ -11,8 +11,8 @@ type PlayOptions = {
 
 const defaultOptions: PlayOptions = {
   speed: 1,
-  delayToSkip: 100,
-}
+  delayToSkip: 100
+};
 
 export async function play(
   stdlib: StdlibType,
@@ -20,14 +20,13 @@ export async function play(
   audioUrl: string,
   options: PlayOptions
 ) {
-
   options = { ...defaultOptions, ...options };
 
-  stdlib.print("Loading, please wait...");
+  stdlib.print('Loading, please wait...');
 
   let player = new Tone.Player();
 
-  if (audioUrl !== "") {
+  if (audioUrl !== '') {
     // Load audio
     player = new Tone.Player(audioUrl).toDestination();
   }
@@ -42,34 +41,32 @@ export async function play(
   });
 
   if (video.format_version !== 3) {
-    stdlib.print(
-      "Unsupported format version, expected 3, got " + video.format_version
-    );
+    stdlib.print('Unsupported format version, expected 3, got ' + video.format_version);
     return;
   }
 
-  if (video.encoding !== "" || video.compression !== "") {
+  if (video.encoding !== '' || video.compression !== '') {
     // Decode the encoded frames
-    stdlib.print("Decoding frames...");
-    let decodedFrames = "";
+    stdlib.print('Decoding frames...');
+    let decodedFrames = '';
     switch (video.encoding) {
-      case "base64":
+      case 'base64':
         decodedFrames = atob(video.encodedFrames);
         break;
     }
 
     if (!decodedFrames) {
-      stdlib.print("Error: Decoded frames are undefined.");
+      stdlib.print('Error: Decoded frames are undefined.');
       return;
     }
 
     // Decompress the frames
-    stdlib.print("Decompressing frames...");
+    stdlib.print('Decompressing frames...');
     let decompressedFrames;
     switch (video.compression) {
-      case "gzip":
+      case 'gzip':
         // Convert binary string to character-number array
-        let charData = decodedFrames.split("").map(function (x) {
+        let charData = decodedFrames.split('').map(function (x) {
           return x.charCodeAt(0);
         });
         // Turn number array into byte-array
@@ -77,28 +74,26 @@ export async function play(
         // Pako
         let data = Pako.inflate(binData);
         // Convert gunzipped byteArray back to ascii string:
-        decompressedFrames = new TextDecoder("utf-8").decode(data);
+        decompressedFrames = new TextDecoder('utf-8').decode(data);
         break;
     }
     video.frames = JSON.parse(decompressedFrames);
   }
 
   if (!video.width) {
-    stdlib.print(
-      "Video width is undefined, guessing from 100th frame. This may be inaccurate."
-    );
+    stdlib.print('Video width is undefined, guessing from 100th frame. This may be inaccurate.');
     // Split newlines
     try {
-      video.width = video.frames[99].text.split("\n")[0].length;
+      video.width = video.frames[99].text.split('\n')[0].length;
     } catch (e) {
       // Fallback to trying the first frame
       try {
-        video.width = video.frames[0].text.split("\n")[0].length;
+        video.width = video.frames[0].text.split('\n')[0].length;
       } catch (e2) {
         console.error(
-          "An error occured while guessing the video width, when trying to get the width of the 100th frame this exception occurred:",
+          'An error occured while guessing the video width, when trying to get the width of the 100th frame this exception occurred:',
           e,
-          "and when trying to get the width of the first frame this exception occurred:",
+          'and when trying to get the width of the first frame this exception occurred:',
           e2
         );
       }
@@ -108,12 +103,12 @@ export async function play(
   // Calculate the scale
   scaleFactor = 100 / video.width;
 
-  stdlib.print("Scale Factor: " + scaleFactor);
-  stdlib.print("Fps: " + video.fps);
-  stdlib.print("Width: " + video.width);
+  stdlib.print('Scale Factor: ' + scaleFactor);
+  stdlib.print('Fps: ' + video.fps);
+  stdlib.print('Width: ' + video.width);
 
   stdlib.print(
-    "Your video will start in 5 seconds, if the video looks weird then you might need to zoom out."
+    'Your video will start in 5 seconds, if the video looks weird then you might need to zoom out.'
   );
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -142,28 +137,31 @@ export async function play(
     // Print one frame every options.speed milliseconds
     let i = 0;
     const framesLength = video.frames.length; // Store the length of the frames array
-    let startTime = Date.now()
-    let skippedInARow: number = 0
+    let startTime = Date.now();
+    let skippedInARow: number = 0;
     setInterval(() => {
       // Check if i is within the bounds of the frames array
       if (i < framesLength) {
-        let sinceStart = Date.now() - startTime
+        let sinceStart = Date.now() - startTime;
         let frame = timeToFrame(video.fps, sinceStart);
         let delayMs = Math.abs(frameToTime(video.fps, i).ms - frameToTime(video.fps, frame).ms);
         if (delayMs > options.delayToSkip) {
-          console.log(delayMs, "out of sync. Skipping to", frame)
+          console.log(delayMs, 'out of sync. Skipping to', frame);
           // Skip to the correct frame
-          i = Math.round(frame)
+          i = Math.round(frame);
           if (skippedInARow >= 5) {
-            console.log("We seem to be stuck in a loop, setting max delay to:", options.delayToSkip + 10)
-            options.delayToSkip = options.delayToSkip + 10
-            skippedInARow = 0
+            console.log(
+              'We seem to be stuck in a loop, setting max delay to:',
+              options.delayToSkip + 10
+            );
+            options.delayToSkip = options.delayToSkip + 10;
+            skippedInARow = 0;
           } else {
-            skippedInARow++
+            skippedInARow++;
           }
           return;
         } else {
-          skippedInARow = 0
+          skippedInARow = 0;
         }
         // Print the frame
         stdlib.setLineData([]);
@@ -185,7 +183,7 @@ function frameToTime(fps: number, frame: number) {
 
   return {
     ms: ms,
-    sec: seconds,
+    sec: seconds
   };
 }
 
